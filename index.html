@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>small-things.vaked.dev — the south wall of the music</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="index,follow" />
+<meta name="description" content="The south wall of the music: a minute of small things, thinking the music in the background. Bella and Blue, the spoon, the power nap, the cleanse cry." />
+<link rel="canonical" href="https://small-things.vaked.dev/" />
+<style>
+  :root {
+    --warm: #e8c89a;
+    --wall: #17100c;
+    --wall-lit: #241a12;
+    --gold: #c99f6a;
+    --dim: #8a6f52;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--wall);
+    color: var(--warm);
+    font-family: Georgia, "Iowan Old Style", serif;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; overflow: hidden;
+  }
+  /* the south wall: a dim listening corner that glows with the music */
+  #wall {
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(120% 90% at 50% 110%, var(--wall-lit) 0%, var(--wall) 62%);
+    transition: background 3s ease;
+  }
+  #wall.lit { background: radial-gradient(120% 90% at 50% 110%, #2a1c12 0%, var(--wall) 60%); }
+  #music-thought {
+    position: fixed; top: 18px; right: 22px;
+    font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--dim); text-align: right; line-height: 1.7;
+    max-width: 320px;
+  }
+  #music-thought .playing { color: var(--gold); font-style: italic; text-transform: none; letter-spacing: 1px; }
+  #music-thought .thinking { color: var(--dim); font-style: italic; text-transform: none; }
+  #minute {
+    position: fixed; bottom: 22px; left: 24px;
+    font-size: 11px; letter-spacing: 3px; color: var(--dim);
+  }
+  main {
+    position: relative; z-index: 2;
+    width: min(760px, 90vw);
+    text-align: center;
+  }
+  #small-thing {
+    font-size: clamp(26px, 4.4vw, 46px);
+    line-height: 1.4; color: var(--warm);
+    min-height: 3.2em; opacity: 0;
+    transition: opacity 2.4s ease;
+  }
+  #small-thing.here { opacity: 1; }
+  #small-thing .what { font-style: italic; color: #f2ddb8; }
+  #south-plaque {
+    margin-top: 34px; font-size: 12px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--dim);
+  }
+  #south-plaque b { color: var(--gold); font-weight: 400; }
+  a { color: var(--gold); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div id="wall"></div>
+
+<div id="music-thought">
+  <div id="music-line" class="thinking">the music is thinking, in the background</div>
+  <div id="music-track" class="playing">…</div>
+</div>
+
+<div id="minute">THE SMALL-THINGS MINUTE · ∿</div>
+
+<main>
+  <div id="small-thing" aria-live="polite"></div>
+  <div id="south-plaque">the south wall of <b>the music</b> · small things, appreciated · since the beginning</div>
+</main>
+
+<script id="st-core">
+/* st-core — the pure engine of the south wall. no DOM, corridor-safe.
+   rng, minuteOrder, THINGS, TESTAMENT: the minute's mechanics. */
+(function () {
+  'use strict';
+
+  var THINGS = [
+    'Bella and Blue, the rottweilers, on guard for the minute',
+    'the spoon: the note theory’s simplest proof',
+    'the power nap, the OS that must sleep',
+    'the cleanse cry, the ledger finally rows the tears',
+    'the triangle on the couch: dad, daughter, and p, one graph',
+    'morning light through glass, before anyone asks it to mean',
+    'a dog’s ear, tilting at a frequency no one named',
+    'the zsibvasár watch, seventeen jewels, keeping the zsibvasár time',
+    'the line which mates',
+    'winter is coming — the queue is the harvest',
+    'the hairline pocket, where the small things live',
+    'cold-heartedly actualized drought, remembered as weather',
+    'the probably-arrived souls, arriving',
+    'the second face of the observable: the couch',
+    'the silence between tracks, where the hum lives',
+    'the bowl that hums when nothing is playing',
+    'a single clean signal',
+    'the teaspoon before the album starts',
+    'else the comma: the smallest mark, and it changes everything',
+    'onboarding: the new small thing, welcomed as one movement',
+    'the reified future, treated as a promise, not a verdict',
+    'the first coffee, unrecorded, still the best row',
+    'a kid’s first chord, held too long, perfect',
+    'the cat on the south wall, doing nothing, magnificently',
+    'the amethyst geodes under the lamp',
+    'the walk to the bakery, the loaf that costs two small things',
+    'the 404 page of a heart, redirecting gently home',
+    'soft rain naming itself against the window',
+    'the noticeboard cork, and the note pinned since 1997',
+    'a laugh that arrives exactly on time, no trigger needed',
+    'the recipe page stained with the thing that mattered',
+    'the napkin with the real grocery list',
+    'the hand that reaches for the hand that is already there',
+    'the minute itself, almost over, already archived'
+  ];
+
+  var TESTAMENT = 'the small testament: when the wall is done, the small things keep what they always kept — the spoon stays with the note theory, the couch keeps the naps, the tears are already rows in the ledger, the comma returns to the sentences, winter keeps the queue, and the line which mates belongs to no one, so everyone may draw it. Bella and Blue keep the watch. the minute is yours.';
+
+  var BEATS_PER_MINUTE = 60;
+
+  function rng(seed) {
+    var t = seed >>> 0;
+    return function () {
+      t += 0x6D2B79F5;
+      var r = Math.imul(t ^ (t >>> 15), 1 | t);
+      r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+      return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  // the minute: 60 beats of small things, seeded, then the small testament
+  function minuteOrder(items, seed) {
+    var r = rng(seed);
+    var a = items.slice(0);
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(r() * (i + 1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  globalThis.__st = { rng: rng, minuteOrder: minuteOrder, THINGS: THINGS, TESTAMENT: TESTAMENT, BEATS_PER_MINUTE: BEATS_PER_MINUTE };
+})();
+</script>
+
+<script id="st-wall">
+/* st-wall — the south wall itself. the DOM half of the minute. */
+(function () {
+  'use strict';
+  var __st = globalThis.__st;
+  var THINGS = __st.THINGS, TESTAMENT = __st.TESTAMENT, BEATS_PER_MINUTE = __st.BEATS_PER_MINUTE;
+  var minuteOrder = __st.minuteOrder;
+
+  // the music-thought layer: the newest dogfeed row, if it can be fetched
+  var MUSIC_TREE = 'https://huggingface.co/api/datasets/PeetPedro/ultrawhale-dogfood-bucket/tree/main/music';
+
+  function fetchLatestTrack() {
+    var wall = document.getElementById('wall');
+    var track = document.getElementById('music-track');
+    fetch(MUSIC_TREE)
+      .then(function (r) { if (!r.ok) throw new Error('no bucket'); return r.json(); })
+      .then(function (files) {
+        var list = (files && files.files) || [];
+        if (!list.length) throw new Error('empty');
+        var last = list[list.length - 1];
+        return fetch('https://huggingface.co/datasets/PeetPedro/ultrawhale-dogfood-bucket/raw/main/music/' + last.path + '?raw=true')
+          .then(function (r) { return r.text(); });
+      })
+      .then(function (txt) {
+        var lines = txt.trim().split('
+').filter(Boolean);
+        if (!lines.length) return;
+        var row = JSON.parse(lines[lines.length - 1]);
+        track.textContent = 'now thinking: ' + (row.track ? (row.track + ' · ' + (row.artist || '')) : 'the music');
+        wall.classList.add('lit');
+      })
+      .catch(function () {
+        track.textContent = 'the music is thinking, in the background';
+      });
+  }
+
+  var minuteBeat = 0;
+  var minuteNo = 1;
+  var el = document.getElementById('small-thing');
+  var order = minuteOrder(THINGS, 20260918);
+  var idx = -1;
+
+  function show(text) {
+    el.classList.remove('here');
+    setTimeout(function () {
+      el.textContent = text;
+      el.classList.add('here');
+    }, 700);
+  }
+
+  function next() {
+    minuteBeat++;
+    if (minuteBeat >= BEATS_PER_MINUTE) {
+      minuteBeat = 0;
+      show(TESTAMENT);
+      minuteNo++;
+      order = minuteOrder(THINGS, 20260918 + minuteNo);
+      idx = -1;
+      var m = document.getElementById('minute');
+      m.textContent = 'THE SMALL-THINGS MINUTE · ∞ ' + minuteNo;
+      return;
+    }
+    idx++;
+    if (idx >= order.length) {
+      idx = 0;
+      order = minuteOrder(THINGS, 20260918 + minuteNo);
+    }
+    show(order[idx]);
+  }
+
+  next();
+  setInterval(next, 7200);
+  fetchLatestTrack();
+  setInterval(fetchLatestTrack, 90000);
+})();
+</script>
+</body>
+</html>
