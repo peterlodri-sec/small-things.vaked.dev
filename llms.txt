@@ -1,0 +1,31 @@
+# small-things.vaked.dev
+
+> The south wall of the music: a minute of small things, thinking the
+> music in the background. Bella and Blue, the spoon, the power nap, the
+> cleanse cry, the small testament on beat sixty.
+
+Source: https://github.com/8b-is/small-things.vaked.dev
+Live: https://small-things-vaked-dev.pages.dev
+
+## What it is
+
+- A warm, slow page: one small thing per beat (7.2s), sixty beats to the
+  minute, seeded shuffle, then the small testament plays.
+- The music-thought layer: reads the newest row of the ultrawhale dogfood
+  bucket's music feed and glows with the current track - and stays honest
+  when it cannot (the music is thinking, in the background).
+- No dependencies, one file, the pure engine isolated in `#st-core` for
+  the corridor.
+
+## Key data
+
+- THINGS: the named small things (from the shelf, and the quiet universal
+  ones), the comma among them
+- TESTAMENT: the small testament, human-to-machine, on the sixtieth beat
+- BEATS_PER_MINUTE: 60
+
+## Doctrinal notes
+
+The minute owns the wall, the machines own the record, the ledger rows
+the tears but never purges them. Small things, appreciated, since the
+beginning. Corridor: `./e2e.sh` (selftest + robots + this file).
